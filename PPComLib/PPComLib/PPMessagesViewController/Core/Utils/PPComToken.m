@@ -14,11 +14,10 @@
 
 #define PPCOMTOKEN_ENABLE_LOG 1
 
-static NSString *const PPComTokenCacheKey = @"com.ppmessage.ppcom.cache.access_token";
-
 @interface PPComToken ()
 
 @property (nonatomic) PPCom *client;
+@property (nonatomic) NSString *cachedAccessToken;
 
 @end
 
@@ -36,7 +35,7 @@ static NSString *const PPComTokenCacheKey = @"com.ppmessage.ppcom.cache.access_t
 }
 
 - (void)getPPComTokenWithBlock:(PPComTokenCompletedBlock)block {
-    NSString *localCacheAccessToken = [self getPPComTokenFromCache];
+    NSString *localCacheAccessToken = self.cachedAccessToken;
     if (localCacheAccessToken) {
         if (PPCOMTOKEN_ENABLE_LOG) PPFastLog(@"fetch access token from local : %@", localCacheAccessToken);
         if (block) block(localCacheAccessToken, nil, YES);
@@ -54,24 +53,12 @@ static NSString *const PPComTokenCacheKey = @"com.ppmessage.ppcom.cache.access_t
         NSString *accessToken = nil;
         if (!error) {
             accessToken = response[@"access_token"];
-            [self storeToCacheWithPPComToken:accessToken];
+            // cache access_token
+            self.cachedAccessToken = accessToken;
         }
         if (block) block(accessToken, error, error == nil);
         
     }];
-}
-
-/** 从本地手机上取出`access_token` **/
-- (NSString*)getPPComTokenFromCache {
-    NSUserDefaults *sharedPreferences = [NSUserDefaults standardUserDefaults];
-    return [sharedPreferences stringForKey:PPComTokenCacheKey];
-}
-
-/** 将`access_token`保存到手机上 **/
-- (void)storeToCacheWithPPComToken:(NSString*)accessToken {
-    NSUserDefaults *sharedPreferences = [NSUserDefaults standardUserDefaults];
-    [sharedPreferences setObject:accessToken forKey:PPComTokenCacheKey];
-    [sharedPreferences synchronize];
 }
 
 #pragma mark - helpers
