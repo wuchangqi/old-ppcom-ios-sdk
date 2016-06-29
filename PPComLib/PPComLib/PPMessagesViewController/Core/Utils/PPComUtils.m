@@ -9,6 +9,7 @@
 #import <UIKit/UIDevice.h>
 #import "PPComUtils.h"
 #import "NSString+Crypto.h"
+#import "PPFastLog.h"
 
 #ifdef PP_LOCAL_DEBUG
 
