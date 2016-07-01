@@ -11,6 +11,7 @@
 #import "PPComAPI.h"
 #import "PPCom.h"
 #import "PPAppInfo.h"
+#import "PPUser.h"
 
 @interface PPGetWaitingQueueLengthHttpModel ()
 
@@ -34,7 +35,10 @@
 - (void)getWaitingQueueLengthWithCompletedBlock:(PPHttpModelCompletedBlock)completedBlock {
     if (!self.client.appInfo || !self.client.appInfo.appId) return;
     
-    NSDictionary *requestParams = @{ @"app_uuid": self.client.appInfo.appId };
+    NSDictionary *requestParams = @{
+        @"app_uuid": self.client.appInfo.appId,
+        @"user_uuid": self.client.user.uuid
+    };
     [self.client.api getWaitingQueueLength:requestParams completionHandler:^(NSDictionary *response, NSError *error) {
         NSInteger *waitingQueueLength = 0;
         if (response && [response[@"error_code"] integerValue] == 0) {

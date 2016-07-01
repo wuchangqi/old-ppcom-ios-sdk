@@ -92,26 +92,24 @@
     }
     
     // 1. get app orggroup
-    [self getAppOrgGroupsWithBlock:^(id obj, NSDictionary *response, NSError *error) {
+    //[self getAppOrgGroupsWithBlock:^(id obj, NSDictionary *response, NSError *error) {
         
-        NSMutableArray *conversations = obj ? obj : self.conversationItems;
-        
-        // 2. get conversations
-        PPGetConversationListHttpModel *getConversationsTask = [PPGetConversationListHttpModel modelWithClient:self.client];
-        [getConversationsTask getConversationListWithBlock:^(id obj, NSDictionary *response, NSError *error) {
-            
-            self.fetchedFromServer = YES;
-            
-            if (obj) {
-                [conversations addObjectsFromArray:obj];
-                [self addConversations:conversations];
-            }
-            
-            if (block) block([self sortedConversations], error);
-            
-        }];
-        
+    NSMutableArray *conversations = self.conversationItems;
+
+    // 2. get conversations
+    PPGetConversationListHttpModel *getConversationsTask = [PPGetConversationListHttpModel modelWithClient:self.client];
+    [getConversationsTask getConversationListWithBlock:^(id obj, NSDictionary *response, NSError *error) {
+        self.fetchedFromServer = YES;
+        if (obj) {
+            [conversations addObjectsFromArray:obj];
+            [self addConversations:conversations];
+        }
+        if (block) {
+            block([self sortedConversations], error);
+        }
     }];
+
+    //}];
     
 }
 
