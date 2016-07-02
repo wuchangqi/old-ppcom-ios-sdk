@@ -54,22 +54,15 @@
 
 - (void)addConversation:(PPConversationItem *)conversation {
     if (conversation) {
-        if (conversation.conversationItemType == PPConversationItemTypeGroup) {
-            [self.conversationItems addObject:conversation];
-        } else {
-            NSInteger existIndex = [self indexForConversation:conversation.uuid];
-            if (existIndex != NSNotFound) {
-                PPConversationItem *exitConversationItem = [self.conversationItems objectAtIndex:existIndex];
-                
-                conversation.userName = PPIsNotNull(conversation.userName) ? conversation.userName : exitConversationItem.userName;
-                conversation.messageSummary = PPIsNotNull(conversation.messageSummary) ? conversation.messageSummary : exitConversationItem.messageSummary;
-                
-                [self.conversationItems replaceObjectAtIndex:existIndex withObject:conversation];
-                
-            } else {
-                [self.conversationItems addObject:conversation];
-            }
+        NSInteger existIndex = [self indexForConversation:conversation.uuid];
+        if (existIndex != NSNotFound) {
+            PPConversationItem *exitConversationItem = [self.conversationItems objectAtIndex:existIndex];
+            conversation.userName = PPIsNotNull(conversation.userName) ? conversation.userName : exitConversationItem.userName;
+            conversation.messageSummary = PPIsNotNull(conversation.messageSummary) ? conversation.messageSummary : exitConversationItem.messageSummary;
+            [self.conversationItems replaceObjectAtIndex:existIndex withObject:conversation];
+            return;
         }
+        [self.conversationItems addObject:conversation];
     }
 }
 
@@ -90,27 +83,16 @@
         if (block) block([self sortedConversations], nil);
         return;
     }
-    
-    // 1. get app orggroup
-    //[self getAppOrgGroupsWithBlock:^(id obj, NSDictionary *response, NSError *error) {
-        
-    NSMutableArray *conversations = self.conversationItems;
-
-    // 2. get conversations
     PPGetConversationListHttpModel *getConversationsTask = [PPGetConversationListHttpModel modelWithClient:self.client];
     [getConversationsTask getConversationListWithBlock:^(id obj, NSDictionary *response, NSError *error) {
         self.fetchedFromServer = YES;
         if (obj) {
-            [conversations addObjectsFromArray:obj];
-            [self addConversations:conversations];
+            [self addConversations:obj];
         }
         if (block) {
             block([self sortedConversations], error);
         }
     }];
-
-    //}];
-    
 }
 
 - (void)updateConversationsWithMessage:(PPMessage *)message {
@@ -255,7 +237,7 @@
     return findIndex;
 }
 
-- (BOOL)isConversationExit:(NSString*)conversationoUUID {
+- (BOOL)isConversationExist:(NSString*)conversationoUUID {
     return [self indexForConversation:conversationoUUID] != NSNotFound;
 }
 

@@ -27,6 +27,7 @@
 #import "PPPolling.h"
 
 #import "PPCreateConversationHttpModel.h"
+#import "PPGetConversationInfoHttpModel.h"
 #import "PPGetWaitingQueueLengthHttpModel.h"
 
 @interface PPConversationsViewController () <PPComInitializeDelegate, PPComMessageDelegate>
@@ -104,11 +105,25 @@
     
 }
 
+- (void) setDefaultConversationByUUID:(__weak PPConversationsViewController *)wself conversationUUID:(NSString *)conversationUUID {
+    PPGetConversationInfoHttpModel *model = [[PPGetConversationInfoHttpModel alloc] initWithClient:wself.client];
+    [model getWithConversationUUID:conversationUUID completedBlock:^(PPConversationItem *conversation, NSDictionary *response, NSError *error) {
+        PPStoreManager *manager = [PPStoreManager instanceWithClient:wself.client];
+        [manager.conversationStore addDefaultConversation:conversation];
+        [self onGetDefaultConversation:wself storeManager:manager];
+    }];
+}
+
 - (void)onFailedGetDefaultConversation:(__weak PPConversationsViewController *)wself {
     PPPolling *pollingConversation = [[PPPolling alloc] initWithClient:wself.client withTimeInterval:5];
     [pollingConversation runWithExecutingCode:^{
         PPGetWaitingQueueLengthHttpModel *getWaitingQueueLengthTask = [PPGetWaitingQueueLengthHttpModel modelWithClient:wself.client];
         [getWaitingQueueLengthTask getWaitingQueueLengthWithCompletedBlock:^(NSNumber *waitingQueueLength, NSDictionary *response, NSError *error) {
+            if (response[@"conversation_uuid"]) {
+                [wself setDefaultConversationByUUID:wself conversationUUID:response[@"conversation_uuid"]];
+                [pollingConversation cancel];
+                return;
+            }
             [[NSOperationQueue mainQueue] addOperationWithBlock:^ {
                 wself.loadingView.loadingText = [NSString stringWithFormat:@"当前等待人数:%@", waitingQueueLength];
             }];
