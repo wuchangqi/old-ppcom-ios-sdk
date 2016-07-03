@@ -13,7 +13,7 @@
 #import "PPConversationItemViewCell+PPConfigureForConversationItem.h"
 
 #import "PPCom.h"
-
+#import "PPComUtils.h"
 #import "PPFastLog.h"
 #import "PPViewUtils.h"
 #import "PPLoadingView.h"
@@ -108,19 +108,26 @@
 - (void) setDefaultConversationByUUID:(__weak PPConversationsViewController *)wself conversationUUID:(NSString *)conversationUUID {
     PPGetConversationInfoHttpModel *model = [[PPGetConversationInfoHttpModel alloc] initWithClient:wself.client];
     [model getWithConversationUUID:conversationUUID completedBlock:^(PPConversationItem *conversation, NSDictionary *response, NSError *error) {
-        PPStoreManager *manager = [PPStoreManager instanceWithClient:wself.client];
-        [manager.conversationStore addDefaultConversation:conversation];
-        [self onGetDefaultConversation:wself storeManager:manager];
+        PPConversationsStore *conversationStore = [PPStoreManager instanceWithClient:self.client].conversationStore;
+        if (![conversationStore isDefaultConversationAvaliable]) {
+            [conversationStore addDefaultConversation:conversation];
+            [self onGetDefaultConversation:self storeManager:[PPStoreManager instanceWithClient:self.client]];
+            [self.loadingView removeFromSuperview];
+        } else {
+            [conversationStore addConversation:conversation];
+            [self gotoMessagesViewControllerWithConversation:conversation];
+        }
     }];
 }
 
 - (void)onFailedGetDefaultConversation:(__weak PPConversationsViewController *)wself {
-    PPPolling *pollingConversation = [[PPPolling alloc] initWithClient:wself.client withTimeInterval:5];
+    PPPolling *pollingConversation = [[PPPolling alloc] initWithClient:wself.client withTimeInterval:1];
     [pollingConversation runWithExecutingCode:^{
         PPGetWaitingQueueLengthHttpModel *getWaitingQueueLengthTask = [PPGetWaitingQueueLengthHttpModel modelWithClient:wself.client];
         [getWaitingQueueLengthTask getWaitingQueueLengthWithCompletedBlock:^(NSNumber *waitingQueueLength, NSDictionary *response, NSError *error) {
-            if (response[@"conversation_uuid"]) {
-                [wself setDefaultConversationByUUID:wself conversationUUID:response[@"conversation_uuid"]];
+            NSString *conversationUUID = response[@"conversation_uuid"];
+            if (PPIsNotNull(conversationUUID)) {
+                [wself setDefaultConversationByUUID:wself conversationUUID:conversationUUID];
                 [pollingConversation cancel];
                 return;
             }
@@ -189,7 +196,7 @@
             
         } else if (msgType == PPWebSocketMsgTypeConversation) {
             
-            [self onWSConversationObjArrived:obj];
+            //[self onWSConversationObjArrived:obj];
             
         }
     }

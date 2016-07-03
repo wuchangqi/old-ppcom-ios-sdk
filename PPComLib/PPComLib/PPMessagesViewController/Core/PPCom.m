@@ -220,6 +220,7 @@
     PPComAPI *api = self.api;
     NSMutableDictionary *params = [[NSMutableDictionary alloc] init];
     params[@"user_email"] = email;
+    params[@"app_uuid"] = self.appUUID;
     
     [api getUserUuid:params completionHandler:^(NSDictionary *response, NSError *error) {
             

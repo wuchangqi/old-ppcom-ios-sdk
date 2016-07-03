@@ -48,24 +48,13 @@
         
         // When we get a `empty successful response`, it marked we should waiting avaliable conversation
         // So we must check `PPIsApiResponseEmpty`
-        if (!error &&
-            response &&
-            [response[@"error_code"] integerValue] == 0
-            && !PPIsApiResponseEmpty(response)) {
-            
+        if (!error && response && [response[@"error_code"] integerValue] == 0 && !PPIsApiResponseEmpty(response)) {
             defaultConversation = [PPConversationItem itemWithClient:self.client body:response];
-            [self getConversationInfoWithConversationUUID:defaultConversation.uuid completed:^(id obj, NSDictionary *response, NSError *error) {
-                if (completed) completed(obj, response, error);
-            }];
-            
-        } else {
-
-            if (completed) completed(defaultConversation, response, error);
-            
         }
-        
+        if (completed) {
+            completed(defaultConversation, response, error);
+        }
     }];
-    
 }
 
 - (void)getConversationInfoWithConversationUUID:(NSString*)conversationUUID completed:(PPHttpModelCompletedBlock)completedBlock; {

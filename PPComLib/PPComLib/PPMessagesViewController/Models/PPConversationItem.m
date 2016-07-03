@@ -50,6 +50,8 @@
             _messageTimestamp = [[lastMessageDic[@"ts"] description] intValue];
 
         } else {
+            NSString *name = [conversationBody objectForKey:@"conversation_name"];
+            NSString *icon = [conversationBody objectForKey:@"conversation_icon"];
             NSString *updateTime = [conversationBody objectForKey:@"updatetime"];
             NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
             [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss SSSSSS"];
@@ -57,9 +59,13 @@
             
             _messageTimestamp = (long) [updateDate timeIntervalSince1970];
             _userName = @"PPMessage";
+
+            if (PPIsNotNull(name)) {
+                _userName = name;
+            }
             
-            if (conversationBody[@"conversation_icon"]) {
-                _userAvatarUrl = [_client.downloader getResourceDownloadUrl:conversationBody[@"conversation_icon"]];
+            if (PPIsNotNull(icon)) {
+                _userAvatarUrl = [_client.downloader getResourceDownloadUrl:icon];
             }
         }
         
