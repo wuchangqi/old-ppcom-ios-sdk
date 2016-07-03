@@ -90,19 +90,23 @@
     self.tableView.tableFooterView = [UIView new];
 }
 
+- (void) checkInitializeOptions:(NSDictionary *)options {
+    NSParameterAssert(options[@"appUUID"] && options[@"apiKey"] && options[@"apiSecret"] && options[@"host"]);
+}
+
 #pragma mark - Initialize
 
-- (void) initialize {
-    [self initializeWithUserEmail:nil];
+- (void) initialize:(NSDictionary *)options {
+    [self checkInitializeOptions:options];
+    self.title = @"会话列表";
+    self.client = [PPCom instanceWithAppUUID:options[@"appUUID"]];
+    [self.client.utils setApiInfo:options];
+    [self initializeWithUserEmail:options[@"email"]];
 }
 
 - (void) initializeWithUserEmail:(NSString *)email {
-    NSParameterAssert(self.appUUID != nil && self.appUUID.length > 0);
-    
     [self startAnimating];
-    self.client = [PPCom instanceWithAppUUID:self.appUUID];
     [self.client initilize:email withDelegate:self];
-    
 }
 
 - (void) setDefaultConversationByUUID:(__weak PPConversationsViewController *)wself conversationUUID:(NSString *)conversationUUID {
@@ -196,7 +200,7 @@
             
         } else if (msgType == PPWebSocketMsgTypeConversation) {
             
-            //[self onWSConversationObjArrived:obj];
+            [self onWSConversationObjArrived:obj];
             
         }
     }

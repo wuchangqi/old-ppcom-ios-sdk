@@ -11,29 +11,14 @@
 #import "NSString+Crypto.h"
 #import "PPFastLog.h"
 
-#ifdef PP_LOCAL_DEBUG
-
-NSString *const PPApiHost = @"http://192.168.0.206:8080/api";
-NSString *const PPFileHost = @"http://192.168.0.206:8080/download/";
-NSString *const PPWebSocketHost = @"ws://192.168.0.206:8080/pcsocket/WS";
-NSString *const PPFileUploadHost = @"http://192.168.0.206:8080/upload";
-NSString *const PPTxtUploadHost = @"http://192.168.0.206:8080/upload";
-NSString *const PPAuthHost = @"http://192.168.0.206:8080/ppauth";
-NSString *const PPApiKey = @"M2IzMzVjNTAzZTIyYjJkZGQ2YmMxODFjN2E1ZGExMGQyNDY1MDc5NA==";
-NSString *const PPApiSecret = @"NjYwMTU5MzYzMTg0NGVjZGU5YmYyZWM3OWYwMWNmNGM3YWJmOWYyMg==";
-
-#else
-
-NSString *const PPApiHost = @"https://ppmessage.com/api";
-NSString *const PPFileHost = @"https://ppmessage.com/download/";
-NSString *const PPWebSocketHost = @"wss://ppmessage.com/pcsocket/WS";
-NSString *const PPFileUploadHost = @"https://ppmessage.com/upload";
-NSString *const PPTxtUploadHost = @"https://ppmessage.com/upload";
-NSString *const PPAuthHost = @"https://ppmessage.com/ppauth";
-NSString *const PPApiKey = @"M2E2OTRjZTQ5Mzk4ZWUxYzRjM2FlZDM2NmE4MjA4MzkzZjFjYWQyOA==";
-NSString *const PPApiSecret = @"ZThmMTM1ZDM4ZmI2NjE1YWE0NWEwMGM3OGNkMzY5MzVjOTQ2MGU0NQ==";
-
-#endif
+NSString *PPApiHost,
+         *PPFileHost,
+         *PPWebSocketHost,
+         *PPFileUploadHost,
+         *PPTxtUploadHost,
+         *PPAuthHost,
+         *PPApiKey,
+         *PPApiSecret;
 
 #pragma mark - Private
 
@@ -114,6 +99,19 @@ NSString* PPFileUrl(NSString *fileId) {
 }
 
 @implementation PPComUtils
+
+- (void) setApiInfo:(NSDictionary *)options {
+    NSString *host = options[@"host"];
+    NSString *wsHost = [host stringByReplacingCharactersInRange:NSMakeRange(0, 4) withString:@"ws"];
+    PPApiKey = options[@"apiKey"];
+    PPApiSecret = options[@"apiSecret"];
+    PPApiHost = [host stringByAppendingFormat:@"%@", @"/api"];
+    PPAuthHost = [host stringByAppendingFormat:@"%@", @"/ppauth"];
+    PPFileHost = [host stringByAppendingFormat:@"%@", @"/download/"];
+    PPTxtUploadHost = [host stringByAppendingFormat:@"%@", @"/upload"];
+    PPFileUploadHost = [host stringByAppendingFormat:@"%@", @"/upload"];
+    PPWebSocketHost = [wsHost stringByAppendingFormat:@"%@", @"/pcsocket/WS"];
+}
 
 - (NSString*) dictionaryToJsonString:(NSDictionary*)dictionary {
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:dictionary

@@ -10,20 +10,20 @@
 
 @interface PPConversationsViewController : UITableViewController
 
-/** 第三方开发者需要提供 appUUID **/
-@property (nonatomic) NSString *appUUID;
-
 #pragma mark - Initialize Methods
 
-/**
- * Initialize with anonymous user
+/*
+ * Initialize app info, api info, user info.
+ * options include:
+ 
+ * 1. appUUID:   your team uuid, required
+ * 2. apiKey:    your ppcom api key, required
+ * 3. apiSecret: your ppcom api secret, required
+ * 4. host:      server url, such as: "https://ppmessage.com", required
+ * 5. email:     user email, optional, if not provided, current user is an annoymous user.
+ *
  */
-- (void)initialize;
-
-/**
- * Initialize with the specified user email
- */
-- (void)initializeWithUserEmail:(NSString*)email;
+- (void) initialize:(NSDictionary *)options;
 
 /**
  * Release resources when press `close` button at the left-side

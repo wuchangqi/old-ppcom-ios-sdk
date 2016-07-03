@@ -9,16 +9,14 @@
 #import <Foundation/Foundation.h>
 #import "PPCom.h"
 
-//#define PP_LOCAL_DEBUG
-
-extern NSString *const PPApiHost;
-extern NSString *const PPFileHost;
-extern NSString *const PPWebSocketHost;
-extern NSString *const PPFileUploadHost;
-extern NSString *const PPTxtUploadHost;
-extern NSString *const PPAuthHost;
-extern NSString *const PPApiKey;
-extern NSString *const PPApiSecret;
+extern NSString *PPApiHost;
+extern NSString *PPFileHost;
+extern NSString *PPWebSocketHost;
+extern NSString *PPFileUploadHost;
+extern NSString *PPTxtUploadHost;
+extern NSString *PPAuthHost;
+extern NSString *PPApiKey;
+extern NSString *PPApiSecret;
 
 NSString* PPSafeString(NSString *str);
 
@@ -31,6 +29,11 @@ BOOL PPIsNotNull(NSString *str);
 NSString *PPFileUrl(NSString* fileId);
 
 @interface PPComUtils : NSObject
+
+/**
+ * set api key, secret, url
+ */
+- (void) setApiInfo:(NSDictionary *)options;
 
 /**
  * Convert dictionary to json string
